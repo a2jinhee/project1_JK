@@ -159,7 +159,7 @@ module DMAC_ENGINE
                     dst_addr_n              = dst_addr + 'd64;
                     wcnt_n                  = awlen_o;
                     if (cnt>='d64) begin
-                        cnt_n                   = cnt - 'd64;
+                        cnt_n                   = cnt[15:0] - 32'h4 - (arlen_o<<2);
                     end
                     else begin
                         cnt_n                   = 'd0;
