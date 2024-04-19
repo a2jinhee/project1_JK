@@ -86,13 +86,45 @@ module DMAC_CFG
     // pwdata  :    |   1   |
     // start   : _______----_____________________________
 	
+    wire    wren                = psel_i & penable_i & pwrite_i;
 
     always @(posedge clk) begin
-		// Fill
-		// your
-		// code
-		// here
+		if (!rst_n) begin
+            ch0_src_addr            <= 32'd0;
+            ch0_dst_addr            <= 32'd0;
+            ch0_byte_len            <= 16'd0;
+            ch1_src_addr            <= 32'd0;
+            ch1_dst_addr            <= 32'd0;
+            ch1_byte_len            <= 16'd0;
+            ch2_src_addr            <= 32'd0;
+            ch2_dst_addr            <= 32'd0;
+            ch2_byte_len            <= 16'd0;
+            ch3_src_addr            <= 32'd0;
+            ch3_dst_addr            <= 32'd0;
+            ch3_byte_len            <= 16'd0;
+        end
+        else if (wren) begin
+            case (paddr_i)
+                'h100: ch0_src_addr         <= pwdata_i[31:0];
+                'h104: ch0_dst_addr         <= pwdata_i[31:0];
+                'h108: ch0_byte_len         <= pwdata_i[15:0];
+                'h200: ch1_src_addr         <= pwdata_i[31:0];
+                'h204: ch1_dst_addr         <= pwdata_i[31:0];
+                'h208: ch1_byte_len         <= pwdata_i[15:0];
+                'h300: ch2_src_addr         <= pwdata_i[31:0];
+                'h304: ch2_dst_addr         <= pwdata_i[31:0];
+                'h308: ch2_byte_len         <= pwdata_i[15:0];
+                'h400: ch3_src_addr         <= pwdata_i[31:0];
+                'h404: ch3_dst_addr         <= pwdata_i[31:0];
+                'h408: ch3_byte_len         <= pwdata_i[15:0];
+            endcase
+        end
 	end
+
+    wire    ch0_start               = wren & (paddr_i=='h10C) & pwdata_i[0];
+    wire    ch1_start               = wren & (paddr_i=='h20C) & pwdata_i[0];
+    wire    ch2_start               = wren & (paddr_i=='h30C) & pwdata_i[0];
+    wire    ch3_start               = wren & (paddr_i=='h40C) & pwdata_i[0];
 
 	// Fill your code here (wren, ch0_start, ch1_start...)
     
@@ -113,10 +145,31 @@ module DMAC_CFG
     reg     [31:0]              rdata;
 
     always @(posedge clk) begin
-		// Fill
-		// your
-		// code
-		// here
+		if (!rst_n) begin
+            rdata               <= 32'd0;
+        end
+        else if (psel_i & !penable_i & !pwrite_i) begin // in the setup cycle in the APB state diagram
+            case (paddr_i)
+                'h0:   rdata            <= 32'h0001_2024;
+                'h100: rdata            <= ch0_src_addr;
+                'h104: rdata            <= ch0_dst_addr;
+                'h108: rdata            <= {16'd0, ch0_byte_len};
+                'h110: rdata            <= {31'd0, ch0_done_i};
+                'h200: rdata            <= ch1_src_addr;
+                'h204: rdata            <= ch1_dst_addr;
+                'h208: rdata            <= {16'd0, ch1_byte_len};
+                'h210: rdata            <= {31'd0, ch1_done_i};
+                'h300: rdata            <= ch2_src_addr;
+                'h304: rdata            <= ch2_dst_addr;
+                'h308: rdata            <= {16'd0, ch2_byte_len};
+                'h310: rdata            <= {31'd0, ch2_done_i};
+                'h400: rdata            <= ch3_src_addr;
+                'h404: rdata            <= ch3_dst_addr;
+                'h408: rdata            <= {16'd0, ch3_byte_len};
+                'h410: rdata            <= {31'd0, ch3_done_i};
+                default: rdata          <= 32'd0;
+            endcase
+        end
 	end
 
     // output assignments

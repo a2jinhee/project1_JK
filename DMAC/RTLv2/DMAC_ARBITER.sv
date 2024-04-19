@@ -23,5 +23,39 @@ module DMAC_ARBITER
 );
 
     // TODO: implement your arbiter here
+    reg [N_MASTER-1:0] current_master;
+    reg [N_MASTER-1:0] next_master;
+
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            current_master <= 0;
+            next_master <= 0;
+            dst_valid_o <= 0;
+        end else begin
+            // Increment the counter to select the next master
+            if (dst_ready_i) begin
+                next_master <= (current_master == N_MASTER - 1) ? 0 : current_master + 1;
+            end
+        end
+    end
+
+    always @* begin
+        // Check if any source is ready and select the current master
+        src_ready_o[current_master] = src_valid_i[current_master] & !dst_valid_o;
+        // Assign data from the selected master to the destination
+        if (src_ready_o[current_master] && dst_ready_i) begin
+            dst_data_o <= src_data_i[current_master];
+            dst_valid_o <= 1;
+        end
+    end
+
+    always @(posedge clk) begin
+        if (!rst_n) begin
+            current_master <= 0;
+        end else if (dst_ready_i) begin
+            current_master <= next_master;
+        end
+    end
+
 
 endmodule

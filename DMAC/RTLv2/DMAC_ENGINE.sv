@@ -79,6 +79,8 @@ module DMAC_ENGINE
                                 fifo_rden;
     wire    [31:0]              fifo_rdata;
 
+    reg [3:0] outstanding_wr_cnt; // 4-bit counter for outstanding write requests
+
 
     // it's desirable to code registers in a simple way
     always_ff @(posedge clk)
@@ -175,7 +177,7 @@ module DMAC_ENGINE
 
                     if (wlast) begin
                         if (cnt==16'd0) begin
-                            state_n                 = S_IDLE;
+                            state_n                 = S_WAIT;
                         end
                         else begin
                             state_n                 = S_RREQ;
@@ -186,11 +188,34 @@ module DMAC_ENGINE
                     end
                 end
             end
-            // FIXME: implement S_WAIT state for project 1
+            S_WAIT: begin
+                // check B channel on the last iteration of write
+                if (outstanding_wr_cnt == 0) begin
+                    state_n = S_IDLE;
+                end
+            end
         endcase
     end
 
-    // FIXME: implement outstanding_wr_cnt
+    // Note: AW handshake and B handshake can occur at the same cycle
+    // On BVALID & BREADY: decrement outstanding_wr_cnt
+    // On AWREADY: increment outstanding_wr_cnt
+    
+    always_ff @(posedge clk) begin
+        if (!rst_n) begin
+            outstanding_wr_cnt <= 4'd0;
+        end
+        else begin
+            if (bvalid_i && bready_o) begin
+                outstanding_wr_cnt <= outstanding_wr_cnt - 1;
+            end
+            if (awready_i) begin
+                outstanding_wr_cnt <= outstanding_wr_cnt + 1;
+            end
+        end
+    end
+
+
     DMAC_FIFO   u_fifo
     (
         .clk                        (clk),
