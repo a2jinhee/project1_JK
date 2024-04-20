@@ -31,39 +31,49 @@ module DMAC_ARBITER
     // dst_valid_o : valid signal for selected slave  = if 1, slave has data to receive
     // dst_data_o : data signal for slave = (id, data, strb, last)
 
-    reg [1:0] current_master = 0; // Counter to keep track of the current master
+    // Internal signals
+    reg [N_MASTER-1:0] highest_priority;
+    reg [N_MASTER-1:0] pending_request;
 
-    // Arbiter logic
+    // Initialize
     always @(posedge clk or negedge rst_n) begin
-        if (~rst_n) begin
-            // Reset all signals
+        if (!rst_n) begin
+            highest_priority <= 0;
+            pending_request <= 0;
             dst_valid_o <= 0;
-            src_ready_o <= {N_MASTER{1'b0}};
-            dst_data_o <= DATA_SIZE'b0;
-            current_master <= 0;
+            dst_data_o <= 0;
+            src_ready_o <= 0;
         end else begin
-            // Round-robin arbitration
-            if (dst_ready_i) begin
-                // Find the next master with valid data
-                for (int i = 0; i < N_MASTER; i = i + 1) begin
-                    current_master <= (current_master + 1) % N_MASTER;
-                    if (src_valid_i[current_master]) begin
-                        // Grant access to the selected master
-                        src_ready_o[current_master] <= 1;
-                        dst_valid_o <= 1;
-                        dst_data_o <= src_data_i[current_master];
-                        // Exit loop after granting access
-                        break;
-                    end
+            // Priority encoder for determining highest priority master
+            for (int i = 0; i < N_MASTER; i++) begin
+                if (src_valid_i[i]) begin
+                    highest_priority <= i;
+                    pending_request <= pending_request | (1 << i);
                 end
-            end else begin
-                // No destination ready, reset all source ready signals
-                src_ready_o <= {N_MASTER{1'b0}};
             end
         end
     end
 
-    
+    // Arbitration logic
+    always @(posedge clk) begin
+        if (rst_n == 1'b0) begin
+            dst_valid_o <= 0;
+            dst_data_o <= 0;
+            src_ready_o <= 0;
+        end else if (dst_ready_i == 1'b1 && |pending_request) begin
+            // Select the highest priority master with valid data
+            dst_valid_o <= 1;
+            dst_data_o <= src_data_i[highest_priority];
+            src_ready_o[highest_priority] <= 1;
+            // Reset pending request for the selected master
+            pending_request <= pending_request & ~(1 << highest_priority);
+        end else begin
+            dst_valid_o <= 0;
+            src_ready_o <= 1;
+        end
+    end
+
+
 
 
 endmodule
