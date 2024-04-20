@@ -61,12 +61,14 @@ module DMAC_ARBITER
 
     always_comb begin
         state_n                 = state;
-        dst_data_n              = 0;
+        dst_data_n              = dst_data;
         dst_valid               = 1'b0;
         src_ready               = '{N_MASTER{1'b0}};
         
         case (state)
         s_0:     begin
+                $display("dst_ready_i: %d", dst_ready_i);
+                $display("src_valid_i: %d", src_ready_i);
                 if (src_ready[0] && dst_ready_i) begin
                     dst_valid = 1'b1;
                     dst_data_n = src_data_i[0];
@@ -106,17 +108,6 @@ module DMAC_ARBITER
                 else if (src_valid_i[2]) begin src_ready[2] = 1'b1; state_n = s_2; end
                 else if (src_valid_i[3]) begin src_ready[3] = 1'b1; state_n = s_3; end
                 end
-        default: begin
-                dst_valid = 1'b0;
-                dst_data_n = 32'd0;
-                
-                begin
-                if      (src_valid_i[0]) begin src_ready[0] = 1'b1; state_n = s_0; end
-                else if (src_valid_i[1]) begin src_ready[1] = 1'b1; state_n = s_1; end
-                else if (src_valid_i[2]) begin src_ready[2] = 1'b1; state_n = s_2; end
-                else if (src_valid_i[3]) begin src_ready[3] = 1'b1; state_n = s_3; end
-                end
-        end
         endcase
     end
 
