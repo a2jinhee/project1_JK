@@ -40,19 +40,23 @@ module DMAC_ARBITER
     end
 
     always @* begin
-        // Check if any source is ready and select the current master
-        if (src_valid_i[current_master] && dst_ready_i) begin
-            src_ready_o[current_master] <= 1;
-        end else begin
-            src_ready_o[current_master] <= 0;
-        end
-
-        // Assign data from the selected master to the destination
-        if (src_ready_o[current_master] && dst_ready_i) begin
-            dst_data_o <= src_data_i[current_master];
-            dst_valid_o <= src_valid_i[current_master];
+    integer i;
+    // Default values
+    dst_valid_o = 0;
+    current_master = N_MASTER; // Initialize to an invalid value
+    
+    // Priority-based arbitration
+    for (i = 0; i < N_MASTER; i = i + 1) begin
+        if (src_valid_i[i] && !src_ready_o[i]) begin
+            // If the master is requesting and it's not granted, grant access to this master
+            dst_valid_o = 1;
+            current_master = i;
+            // Exit the loop after granting access to the highest priority master
+            break;
         end
     end
+end
+
 
     always @(posedge clk) begin
         if (!rst_n) begin
