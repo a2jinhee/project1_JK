@@ -23,41 +23,47 @@ module DMAC_ARBITER
 );
 
     // TODO: implement your arbiter here
-    // - The arbiter should be able to select one of the masters.
-    // - The arbiter should be able to transfer data from the selected master to the slave.
-    // - The arbiter should be able to handle the ready/valid signals
-    // - Keep in mind that src_valid_i, dst_ready_i is INPUT, and src_ready_o, dst_valid_o is OUTPUT.
-    reg [N_MASTER-1:0] selected_master;
-    reg [DATA_SIZE-1:0] selected_data;
+    // src_valid_i : valid signal vector for each master = if 1, master has data to send
+    // src_data_i :data signal vector for each master = (id, data, strb, last)
+    // dst_ready_i :ready signal for selected slave = if 1, slave is ready to receive data
 
+    // src_ready_o :ready signal vector for each master = if 1, master is ready to send data
+    // dst_valid_o : valid signal for selected slave  = if 1, slave has data to receive
+    // dst_data_o : data signal for slave = (id, data, strb, last)
+
+    reg [1:0] current_master = 0; // Counter to keep track of the current master
+
+    // Arbiter logic
     always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            selected_master <= 0;
-            selected_data <= 0;
+        if (~rst_n) begin
+            // Reset all signals
             dst_valid_o <= 0;
-            for (int i = 0; i < N_MASTER; i = i + 1) begin
-                src_ready_o[i] <= 0;
-            end
+            src_ready_o <= {N_MASTER{1'b0}};
+            dst_data_o <= DATA_SIZE'b0;
+            current_master <= 0;
         end else begin
-            // Priority-based selection
-            for (int i = 0; i < N_MASTER; i = i + 1) begin
-                if (src_valid_i[i] && dst_ready_i) begin
-                    selected_master <= i;
-                    selected_data <= src_data_i[i];
-                    dst_valid_o <= 1;
-                    src_ready_o[i] <= 1;
+            // Round-robin arbitration
+            if (dst_ready_i) begin
+                // Find the next master with valid data
+                for (int i = 0; i < N_MASTER; i = i + 1) begin
+                    current_master <= (current_master + 1) % N_MASTER;
+                    if (src_valid_i[current_master]) begin
+                        // Grant access to the selected master
+                        src_ready_o[current_master] <= 1;
+                        dst_valid_o <= 1;
+                        dst_data_o <= src_data_i[current_master];
+                        // Exit loop after granting access
+                        break;
+                    end
                 end
+            end else begin
+                // No destination ready, reset all source ready signals
+                src_ready_o <= {N_MASTER{1'b0}};
             end
         end
     end
 
-    always @(posedge clk) begin
-        if (dst_ready_i && dst_valid_o) begin
-            dst_data_o <= selected_data;
-            dst_valid_o <= 0;
-            src_ready_o[selected_master] <= 0;
-        end
-    end
+    
 
 
 endmodule
