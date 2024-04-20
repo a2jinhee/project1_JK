@@ -6,7 +6,7 @@
 `define     CMD_OFFSET  32'hc
 `define     STAT_OFFSET 32'h10
 
-`define 	  TIMEOUT_DELAY 	9999//9999
+`define 	  TIMEOUT_DELAY 	99999//999
 
 `define     SRC_REGION_START    32'h0000_0000
 `define     SRC_REGION_SIZE     32'h0000_2000
