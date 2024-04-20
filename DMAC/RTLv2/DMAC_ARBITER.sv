@@ -43,7 +43,7 @@ module DMAC_ARBITER
     always @(posedge clk or negedge rst_n) begin
         if (~rst_n) begin
             round_robin_counter <= 0;
-            src_ready_o <= {N_MASTER{1'b0}}; // Initialize all src_ready_o signals to 0
+            src_ready_o <= 4'b0000; // Initialize all src_ready_o signals to 0
         end else begin
             if (dst_ready_i && dst_valid_o) begin
                 // If the destination is ready and data was consumed, move to the next round
