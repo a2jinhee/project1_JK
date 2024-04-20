@@ -90,6 +90,8 @@ module DMAC_ARBITER
                     else state_n = s_0; 
                 end
                 end
+
+
         s_1:    begin
                 $display("STATE: 1");
                 $display("dst_ready_i: %d", dst_ready_i);
@@ -105,6 +107,8 @@ module DMAC_ARBITER
                 else if (src_valid_i[1]) begin src_ready_n[1] = 1'b1; state_n = s_1; end
                 else state_n = s_1; 
                 end
+
+
         s_2:    begin
                 $display("STATE: 2");
                 $display("dst_ready_i: %d", dst_ready_i);
@@ -120,6 +124,8 @@ module DMAC_ARBITER
                 else if (src_valid_i[2]) begin src_ready_n[2] = 1'b1; state_n = s_2; end
                 else state_n = s_2;
                 end
+
+                
         s_3:    begin
                 $display("STATE: 3");
                 $display("dst_ready_i: %d", dst_ready_i);
