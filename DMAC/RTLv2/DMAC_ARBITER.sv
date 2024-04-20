@@ -64,8 +64,8 @@ module DMAC_ARBITER
     always_comb begin
         state_n                 = state;
         dst_data_n              = dst_data;
-        dst_valid_n             = dst_valid;
-        src_ready_n               = src_ready;
+        dst_valid_n             = 1'b0;
+        src_ready_n             = '{N_MASTER{1'b0}};
         
         case (state)
         s_0:     begin
