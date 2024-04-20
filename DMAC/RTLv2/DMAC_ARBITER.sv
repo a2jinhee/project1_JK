@@ -65,7 +65,7 @@ module DMAC_ARBITER
         dst_valid               = 1'b0;
         src_ready               = 4'b0000;
         
-        case (present_state)
+        case (state)
         s_0:     begin
                 if (src_ready[0] && dst_ready_i) begin
                     dst_valid = 1'b1;
