@@ -45,8 +45,8 @@ module DMAC_ARBITER
 
     reg     [1:0]               state,          state_n;
     reg     [31:0]              dst_data,       dst_data_n;
-    reg                        dst_valid;
-    reg     [3:0]               src_ready;
+    reg                         dst_valid;
+    reg                         src_ready[N_MASTER];
 
     // it's desirable to code registers in a simple way
     always_ff @(posedge clk)
@@ -122,6 +122,9 @@ module DMAC_ARBITER
 
     assign  dst_data_o                = dst_data;
     assign  dst_valid_o               = dst_valid;
-    assign  src_ready_o               = src_ready;
+    assign  src_ready_o[0]               = src_ready[0];
+    assign  src_ready_o[1]               = src_ready[1];
+    assign  src_ready_o[2]               = src_ready[2];
+    assign  src_ready_o[3]               = src_ready[3];
 
 endmodule
