@@ -35,7 +35,9 @@ module DMAC_ARBITER
             selected_master <= 0;
             selected_data <= 0;
             dst_valid_o <= 0;
-            src_ready_o <= {N_MASTER{1'b0}};
+            for (int i = 0; i < N_MASTER; i = i + 1) begin
+                src_ready_o[i] <= 0;
+            end
         end else begin
             // Priority-based selection
             for (int i = 0; i < N_MASTER; i = i + 1) begin
@@ -56,5 +58,6 @@ module DMAC_ARBITER
             src_ready_o[selected_master] <= 0;
         end
     end
+
 
 endmodule
