@@ -80,10 +80,10 @@ module DMAC_ARBITER
                     dst_data_n = src_data_i[0];
                 end
 
-                if      (src_valid_i[1]) begin src_ready[1] = 1'b1; state_n = s_1; end
-                else if (src_valid_i[2]) begin src_ready[2] = 1'b1; state_n = s_2; end
-                else if (src_valid_i[3]) begin src_ready[3] = 1'b1; state_n = s_3; end
-                else if (src_valid_i[0]) begin src_ready[0] = 1'b1; state_n = s_0; end
+                if      (src_valid_i[1]) begin src_ready_n[1] = 1'b1; state_n = s_1; end
+                else if (src_valid_i[2]) begin src_ready_n[2] = 1'b1; state_n = s_2; end
+                else if (src_valid_i[3]) begin src_ready_n[3] = 1'b1; state_n = s_3; end
+                else if (src_valid_i[0]) begin src_ready_n[0] = 1'b1; state_n = s_0; end
                 else state_n = s_0; 
                 end
         s_1:    begin
@@ -95,10 +95,10 @@ module DMAC_ARBITER
                     dst_valid_n = 1'b1;
                     dst_data_n = src_data_i[1];
                 end
-                if      (src_valid_i[2]) begin src_ready[2] = 1'b1; state_n = s_2; end
-                else if (src_valid_i[3]) begin src_ready[3] = 1'b1; state_n = s_3; end
-                else if (src_valid_i[0]) begin src_ready[0] = 1'b1; state_n = s_0; end
-                else if (src_valid_i[1]) begin src_ready[1] = 1'b1; state_n = s_1; end
+                if      (src_valid_i[2]) begin src_ready_n[2] = 1'b1; state_n = s_2; end
+                else if (src_valid_i[3]) begin src_ready_n[3] = 1'b1; state_n = s_3; end
+                else if (src_valid_i[0]) begin src_ready_n[0] = 1'b1; state_n = s_0; end
+                else if (src_valid_i[1]) begin src_ready_n[1] = 1'b1; state_n = s_1; end
                 else state_n = s_1; 
                 end
         s_2:    begin
@@ -110,10 +110,10 @@ module DMAC_ARBITER
                     dst_valid_n = 1'b1;
                     dst_data_n = src_data_i[2];
                 end
-                if      (src_valid_i[3]) begin src_ready[3] = 1'b1; state_n = s_3; end
-                else if (src_valid_i[0]) begin src_ready[0] = 1'b1; state_n = s_0; end
-                else if (src_valid_i[1]) begin src_ready[1] = 1'b1; state_n = s_1; end
-                else if (src_valid_i[2]) begin src_ready[2] = 1'b1; state_n = s_2; end
+                if      (src_valid_i[3]) begin src_ready_n[3] = 1'b1; state_n = s_3; end
+                else if (src_valid_i[0]) begin src_ready_n[0] = 1'b1; state_n = s_0; end
+                else if (src_valid_i[1]) begin src_ready_n[1] = 1'b1; state_n = s_1; end
+                else if (src_valid_i[2]) begin src_ready_n[2] = 1'b1; state_n = s_2; end
                 else state_n = s_2;
                 end
         s_3:    begin
@@ -125,10 +125,10 @@ module DMAC_ARBITER
                     dst_valid_n = 1'b1;
                     dst_data_n = src_data_i[3];
                 end
-                if      (src_valid_i[0]) begin src_ready[0] = 1'b1; state_n = s_0; end
-                else if (src_valid_i[1]) begin src_ready[1] = 1'b1; state_n = s_1; end
-                else if (src_valid_i[2]) begin src_ready[2] = 1'b1; state_n = s_2; end
-                else if (src_valid_i[3]) begin src_ready[3] = 1'b1; state_n = s_3; end
+                if      (src_valid_i[0]) begin src_ready_n[0] = 1'b1; state_n = s_0; end
+                else if (src_valid_i[1]) begin src_ready_n[1] = 1'b1; state_n = s_1; end
+                else if (src_valid_i[2]) begin src_ready_n[2] = 1'b1; state_n = s_2; end
+                else if (src_valid_i[3]) begin src_ready_n[3] = 1'b1; state_n = s_3; end
                 else state_n = s_3;
                 end
         endcase
