@@ -62,35 +62,30 @@ module DMAC_ARBITER
                 else if (src_valid_i[2]) begin src_ready_o[2] = 1'b1; next_state = s_2; end
                 else if (src_valid_i[3]) begin src_ready_o[3] = 1'b1; next_state = s_3; end
                 else if (src_valid_i[0]) begin src_ready_o[0] = 1'b1; next_state = s_0; end
-                else             next_state = s_ideal;
                 end
         s_1:    begin
                 if      (src_valid_i[2]) begin src_ready_o[2] = 1'b1; next_state = s_2; end
                 else if (src_valid_i[3]) begin src_ready_o[3] = 1'b1; next_state = s_3; end
                 else if (src_valid_i[0]) begin src_ready_o[0] = 1'b1; next_state = s_0; end
                 else if (src_valid_i[1]) begin src_ready_o[1] = 1'b1; next_state = s_1; end
-                else             next_state = s_ideal;
                 end
         s_2:    begin
                 if      (src_valid_i[3]) begin src_ready_o[3] = 1'b1; next_state = s_3; end
                 else if (src_valid_i[0]) begin src_ready_o[0] = 1'b1; next_state = s_0; end
                 else if (src_valid_i[1]) begin src_ready_o[1] = 1'b1; next_state = s_1; end
                 else if (src_valid_i[2]) begin src_ready_o[2] = 1'b1; next_state = s_2; end
-                else             next_state = s_ideal;
                 end
         s_3:    begin
                 if      (src_valid_i[0]) begin src_ready_o[0] = 1'b1; next_state = s_0; end
                 else if (src_valid_i[1]) begin src_ready_o[1] = 1'b1; next_state = s_1; end
                 else if (src_valid_i[2]) begin src_ready_o[2] = 1'b1; next_state = s_2; end
                 else if (src_valid_i[3]) begin src_ready_o[3] = 1'b1; next_state = s_3; end
-                else             next_state = s_ideal;
                 end
         default: begin
                 if      (src_valid_i[0]) begin src_ready_o[0] = 1'b1; next_state = s_0; end
                 else if (src_valid_i[1]) begin src_ready_o[1] = 1'b1; next_state = s_1; end
                 else if (src_valid_i[2]) begin src_ready_o[2] = 1'b1; next_state = s_2; end
-                else if (src_valid_i[3]) begin vsrc_ready_o[3] = 1'b1; next_state = s_3; end
-                else             next_state = s_ideal;
+                else if (src_valid_i[3]) begin src_ready_o[3] = 1'b1; next_state = s_3; end
                 end
         endcase
     end
@@ -98,28 +93,29 @@ module DMAC_ARBITER
     always @ (*) begin
         case (present_state)
             s_0: 
-                if (src_ready[0] && dst_ready_i) begin
+                if (src_ready_o[0] && dst_ready_i) begin
                     dst_valid_o = 1'b1;
                     dst_data_o = src_data_i[0];
                 end
             s_1:
-                if (src_ready[1] && dst_ready_i) begin
+                if (src_ready_o[1] && dst_ready_i) begin
                     dst_valid_o = 1'b1;
                     dst_data_o = src_data_i[1];
                 end
             s_2: 
-                if (src_ready[2] && dst_ready_i) begin
+                if (src_ready_o[2] && dst_ready_i) begin
                     dst_valid_o = 1'b1;
                     dst_data_o = src_data_i[2];
                 end
             s_3: 
-                if (src_ready[3] && dst_ready_i) begin
+                if (src_ready_o[3] && dst_ready_i) begin
                     dst_valid_o = 1'b1;
                     dst_data_o = src_data_i[3];
                 end
-            default: 
+            default: begin
                 dst_valid_o = 1'b0;
                 dst_data_o = 32'd0;
+            end
         endcase
     end
 
