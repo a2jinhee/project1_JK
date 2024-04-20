@@ -38,85 +38,90 @@ module DMAC_ARBITER
     // get data from the selected slave and send it to the dst_data_o
 
     // mnemonics for state values
-    reg [1:0] present_state;
-    reg [1:0] next_state;
+    localparam                  S_0  = 2'd0,
+                                S_1  = 2'd1,
+                                S_2  = 2'd2,
+                                S_3  = 2'd3;
 
-    parameter [1:0] s_0 = 2'b00;
-    parameter [1:0] s_1 = 2'b01;
-    parameter [1:0] s_2 = 2'b10;
-    parameter [1:0] s_3 = 2'b11;
+    reg     [1:0]               state,          state_n;
+    reg     [31:0]              dst_data,       dst_data_n;
+    reg                         dst_valid
+    reg     [3:0]               src_ready
 
-    always @ (posedge clk or negedge rst_n) begin
+    // it's desirable to code registers in a simple way
+    always_ff @(posedge clk)
         if (!rst_n) begin
-            present_state <= s_0;
+            state               <= S_0;
+            dst_data            <= 32'd0;
         end
         else begin
-            present_state <= next_state;
+            state               <= state_n;
+            dst_data            <= dst_data_n;
         end
-    end
 
-    always @ (*) begin
+    always_comb begin
+        state_n                 = state;
+        dst_data_n              = dst_data;
+        dst_valid               = 1'b0;
+        src_ready               = 4'b0000;
+        
         case (present_state)
         s_0:     begin
-                if      (src_valid_i[1]) begin src_ready_o[1] = 1'b1; next_state = s_1; end
-                else if (src_valid_i[2]) begin src_ready_o[2] = 1'b1; next_state = s_2; end
-                else if (src_valid_i[3]) begin src_ready_o[3] = 1'b1; next_state = s_3; end
-                else if (src_valid_i[0]) begin src_ready_o[0] = 1'b1; next_state = s_0; end
+                if (src_ready[0] && dst_ready_i) begin
+                    dst_valid = 1'b1;
+                    dst_data_n = src_data_i[0];
+                end
+                if      (src_valid_i[1]) begin src_ready[1] = 1'b1; state_n = s_1; end
+                else if (src_valid_i[2]) begin src_ready[2] = 1'b1; state_n = s_2; end
+                else if (src_valid_i[3]) begin src_ready[3] = 1'b1; state_n = s_3; end
+                else if (src_valid_i[0]) begin src_ready[0] = 1'b1; state_n = s_0; end
                 end
         s_1:    begin
-                if      (src_valid_i[2]) begin src_ready_o[2] = 1'b1; next_state = s_2; end
-                else if (src_valid_i[3]) begin src_ready_o[3] = 1'b1; next_state = s_3; end
-                else if (src_valid_i[0]) begin src_ready_o[0] = 1'b1; next_state = s_0; end
-                else if (src_valid_i[1]) begin src_ready_o[1] = 1'b1; next_state = s_1; end
+                if (src_ready[1] && dst_ready_i) begin
+                    dst_valid = 1'b1;
+                    dst_data_n = src_data_i[1];
+                end
+                if      (src_valid_i[2]) begin src_ready[2] = 1'b1; state_n = s_2; end
+                else if (src_valid_i[3]) begin src_ready[3] = 1'b1; state_n = s_3; end
+                else if (src_valid_i[0]) begin src_ready[0] = 1'b1; state_n = s_0; end
+                else if (src_valid_i[1]) begin src_ready[1] = 1'b1; state_n = s_1; end
                 end
         s_2:    begin
-                if      (src_valid_i[3]) begin src_ready_o[3] = 1'b1; next_state = s_3; end
-                else if (src_valid_i[0]) begin src_ready_o[0] = 1'b1; next_state = s_0; end
-                else if (src_valid_i[1]) begin src_ready_o[1] = 1'b1; next_state = s_1; end
-                else if (src_valid_i[2]) begin src_ready_o[2] = 1'b1; next_state = s_2; end
+                if (src_ready[2] && dst_ready_i) begin
+                    dst_valid = 1'b1;
+                    dst_data_n = src_data_i[2];
+                end
+                if      (src_valid_i[3]) begin src_ready[3] = 1'b1; state_n = s_3; end
+                else if (src_valid_i[0]) begin src_ready[0] = 1'b1; state_n = s_0; end
+                else if (src_valid_i[1]) begin src_ready[1] = 1'b1; state_n = s_1; end
+                else if (src_valid_i[2]) begin src_ready[2] = 1'b1; state_n = s_2; end
                 end
         s_3:    begin
-                if      (src_valid_i[0]) begin src_ready_o[0] = 1'b1; next_state = s_0; end
-                else if (src_valid_i[1]) begin src_ready_o[1] = 1'b1; next_state = s_1; end
-                else if (src_valid_i[2]) begin src_ready_o[2] = 1'b1; next_state = s_2; end
-                else if (src_valid_i[3]) begin src_ready_o[3] = 1'b1; next_state = s_3; end
+                if (src_ready[3] && dst_ready_i) begin
+                    dst_valid = 1'b1;
+                    dst_data_n = src_data_i[3];
+                end
+                if      (src_valid_i[0]) begin src_ready[0] = 1'b1; state_n = s_0; end
+                else if (src_valid_i[1]) begin src_ready[1] = 1'b1; state_n = s_1; end
+                else if (src_valid_i[2]) begin src_ready[2] = 1'b1; state_n = s_2; end
+                else if (src_valid_i[3]) begin src_ready[3] = 1'b1; state_n = s_3; end
                 end
         default: begin
-                if      (src_valid_i[0]) begin src_ready_o[0] = 1'b1; next_state = s_0; end
-                else if (src_valid_i[1]) begin src_ready_o[1] = 1'b1; next_state = s_1; end
-                else if (src_valid_i[2]) begin src_ready_o[2] = 1'b1; next_state = s_2; end
-                else if (src_valid_i[3]) begin src_ready_o[3] = 1'b1; next_state = s_3; end
+                dst_valid = 1'b0;
+                dst_data_n = 32'd0;
+                
+                begin
+                if      (src_valid_i[0]) begin src_ready[0] = 1'b1; state_n = s_0; end
+                else if (src_valid_i[1]) begin src_ready[1] = 1'b1; state_n = s_1; end
+                else if (src_valid_i[2]) begin src_ready[2] = 1'b1; state_n = s_2; end
+                else if (src_valid_i[3]) begin src_ready[3] = 1'b1; state_n = s_3; end
                 end
+        end
         endcase
     end
 
-    always @ (*) begin
-        case (present_state)
-            s_0: 
-                if (src_ready_o[0] && dst_ready_i) begin
-                    dst_valid_o = 1'b1;
-                    dst_data_o = src_data_i[0];
-                end
-            s_1:
-                if (src_ready_o[1] && dst_ready_i) begin
-                    dst_valid_o = 1'b1;
-                    dst_data_o = src_data_i[1];
-                end
-            s_2: 
-                if (src_ready_o[2] && dst_ready_i) begin
-                    dst_valid_o = 1'b1;
-                    dst_data_o = src_data_i[2];
-                end
-            s_3: 
-                if (src_ready_o[3] && dst_ready_i) begin
-                    dst_valid_o = 1'b1;
-                    dst_data_o = src_data_i[3];
-                end
-            default: begin
-                dst_valid_o = 1'b0;
-                dst_data_o = 32'd0;
-            end
-        endcase
-    end
+    assign  dst_data_o                = dst_data;
+    assign  dst_valid_o               = dst_valid;
+    assign  src_ready_o               = src_ready;
 
 endmodule
