@@ -38,10 +38,10 @@ module DMAC_ARBITER
     // get data from the selected slave and send it to the dst_data_o
 
     // mnemonics for state values
-    localparam                  S_0  = 2'd0,
-                                S_1  = 2'd1,
-                                S_2  = 2'd2,
-                                S_3  = 2'd3;
+    localparam                  s_0  = 2'd0,
+                                s_1  = 2'd1,
+                                s_2  = 2'd2,
+                                s_3  = 2'd3;
 
     reg     [1:0]               state,          state_n;
     reg     [31:0]              dst_data,       dst_data_n;
