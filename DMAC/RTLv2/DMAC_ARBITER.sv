@@ -97,15 +97,19 @@ module DMAC_ARBITER
                 $display("dst_ready_i: %d", dst_ready_i);
                 $display("src_valid_i: %d%d%d%d", src_valid_i[0], src_valid_i[1], src_valid_i[2], src_valid_i[3]);
                 $display("src_ready: %d%d%d%d", src_ready[0], src_ready[1], src_ready[2], src_ready[3]);
-                if (dst_ready_i) begin
+                
+                if (src_valid_i[1]) begin
+                    src_ready_n[1] = 1'b1;
                     dst_valid_n = 1'b1;
                     dst_data_n = src_data_i[1];
                 end
-                if      (src_valid_i[2]) begin src_ready_n[2] = 1'b1; state_n = s_2; end
-                else if (src_valid_i[3]) begin src_ready_n[3] = 1'b1; state_n = s_3; end
-                else if (src_valid_i[0]) begin src_ready_n[0] = 1'b1; state_n = s_0; end
-                else if (src_valid_i[1]) begin src_ready_n[1] = 1'b1; state_n = s_1; end
-                else state_n = s_1; 
+                if (dst_ready_i) begin
+                    if      (src_valid_i[2]) begin state_n = s_2; end
+                    else if (src_valid_i[3]) begin state_n = s_3; end
+                    else if (src_valid_i[0]) begin state_n = s_0; end
+                    else if (src_valid_i[1]) begin state_n = s_1; end
+                    else state_n = s_1; 
+                end
                 end
 
 
@@ -114,15 +118,19 @@ module DMAC_ARBITER
                 $display("dst_ready_i: %d", dst_ready_i);
                 $display("src_valid_i: %d%d%d%d", src_valid_i[0], src_valid_i[1], src_valid_i[2], src_valid_i[3]);
                 $display("src_ready: %d%d%d%d", src_ready[0], src_ready[1], src_ready[2], src_ready[3]);
-                if (dst_ready_i) begin
+                if (src_valid_i[2]) begin
+                    src_ready_n[2] = 1'b1;
                     dst_valid_n = 1'b1;
                     dst_data_n = src_data_i[2];
                 end
-                if      (src_valid_i[3]) begin src_ready_n[3] = 1'b1; state_n = s_3; end
-                else if (src_valid_i[0]) begin src_ready_n[0] = 1'b1; state_n = s_0; end
-                else if (src_valid_i[1]) begin src_ready_n[1] = 1'b1; state_n = s_1; end
-                else if (src_valid_i[2]) begin src_ready_n[2] = 1'b1; state_n = s_2; end
-                else state_n = s_2;
+
+                if (dst_ready_i) begin
+                    if      (src_valid_i[3]) begin state_n = s_3; end
+                    else if (src_valid_i[0]) begin state_n = s_0; end
+                    else if (src_valid_i[1]) begin state_n = s_1; end
+                    else if (src_valid_i[2]) begin state_n = s_2; end
+                    else state_n = s_2;
+                end
                 end
 
 
@@ -131,15 +139,19 @@ module DMAC_ARBITER
                 $display("dst_ready_i: %d", dst_ready_i);
                 $display("src_valid_i: %d%d%d%d", src_valid_i[0], src_valid_i[1], src_valid_i[2], src_valid_i[3]);
                 $display("src_ready: %d%d%d%d", src_ready[0], src_ready[1], src_ready[2], src_ready[3]);
-                if (dst_ready_i) begin
+                if (src_valid_i[3]) begin
+                    src_ready_n[3] = 1'b1;
                     dst_valid_n = 1'b1;
                     dst_data_n = src_data_i[3];
                 end
-                if      (src_valid_i[0]) begin src_ready_n[0] = 1'b1; state_n = s_0; end
-                else if (src_valid_i[1]) begin src_ready_n[1] = 1'b1; state_n = s_1; end
-                else if (src_valid_i[2]) begin src_ready_n[2] = 1'b1; state_n = s_2; end
-                else if (src_valid_i[3]) begin src_ready_n[3] = 1'b1; state_n = s_3; end
-                else state_n = s_3;
+
+                if (dst_ready_i) begin
+                    if      (src_valid_i[0]) begin state_n = s_0; end
+                    else if (src_valid_i[1]) begin state_n = s_1; end
+                    else if (src_valid_i[2]) begin state_n = s_2; end
+                    else if (src_valid_i[3]) begin state_n = s_3; end
+                    else state_n = s_3;
+                    end
                 end
         endcase
     end
