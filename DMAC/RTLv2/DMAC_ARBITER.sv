@@ -22,49 +22,36 @@ module DMAC_ARBITER
     output  reg     [DATA_SIZE-1:0] dst_data_o
 );
 
-    // TODO: implement your arbiter here
-    reg [N_MASTER-1:0] current_master;
-    reg [N_MASTER-1:0] next_master;
-
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            current_master <= 0;
-            next_master <= 0;
-            dst_valid_o <= 0;
+always @* begin
+    // Find the next valid master
+    integer i;
+    for (i = 0; i < N_MASTER; i = i + 1) begin
+        if (src_valid_i[next_master]) begin
+            // Next master is valid, grant access to it
+            src_ready_o[next_master] = 1;
+            break;
         end else begin
-            // Increment the counter to select the next master
-            if (dst_ready_i) begin
-                next_master <= (current_master == N_MASTER - 1) ? 0 : current_master + 1;
-            end
+            // Move to the next master
+            next_master = (next_master == N_MASTER - 1) ? 0 : next_master + 1;
         end
     end
 
-    always @* begin
-    integer i;
-    // Default values
-    dst_valid_o = 0;
-    current_master = N_MASTER; // Initialize to an invalid value
-    
-    // Priority-based arbitration
+    // Reset src_ready_o for all masters except the current one
     for (i = 0; i < N_MASTER; i = i + 1) begin
-        if (src_valid_i[i] && !src_ready_o[i]) begin
-            // If the master is requesting and it's not granted, grant access to this master
-            dst_valid_o = 1;
-            current_master = i;
-            // Exit the loop after granting access to the highest priority master
-            break;
+        if (i != current_master) begin
+            src_ready_o[i] = 0;
         end
+    end
+
+    // Check if any master is ready to send data
+    if (src_ready_o[current_master]) begin
+        // Transfer data to destination
+        dst_data_o = src_data_i[current_master];
+        dst_valid_o = 1;
+    end else begin
+        // No master is ready, keep destination invalid
+        dst_valid_o = 0;
     end
 end
-
-
-    always @(posedge clk) begin
-        if (!rst_n) begin
-            current_master <= 0;
-        end else if (dst_ready_i) begin
-            current_master <= next_master;
-        end
-    end
-
 
 endmodule
