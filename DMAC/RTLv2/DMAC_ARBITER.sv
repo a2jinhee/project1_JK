@@ -46,7 +46,7 @@ module DMAC_ARBITER
     reg     [1:0]               state,          state_n;
     reg     [31:0]              dst_data,       dst_data_n;
     reg                         dst_valid,      dst_valid_n;
-    reg                         src_ready[N_MASTER];
+    reg                         src_ready[N_MASTER], src_ready_n[N_MASTER];
 
     // it's desirable to code registers in a simple way
     always_ff @(posedge clk)
@@ -65,7 +65,7 @@ module DMAC_ARBITER
         state_n                 = state;
         dst_data_n              = dst_data;
         dst_valid_n             = dst_valid;
-        src_ready               = '{N_MASTER{1'b0}};
+        src_ready_n               = src_ready;
         
         case (state)
         s_0:     begin
@@ -82,6 +82,7 @@ module DMAC_ARBITER
                 else if (src_valid_i[2]) begin src_ready[2] = 1'b1; state_n = s_2; end
                 else if (src_valid_i[3]) begin src_ready[3] = 1'b1; state_n = s_3; end
                 else if (src_valid_i[0]) begin src_ready[0] = 1'b1; state_n = s_0; end
+                else state_n = s_0; 
                 end
         s_1:    begin
                 $display("STATE: 1");
@@ -96,6 +97,7 @@ module DMAC_ARBITER
                 else if (src_valid_i[3]) begin src_ready[3] = 1'b1; state_n = s_3; end
                 else if (src_valid_i[0]) begin src_ready[0] = 1'b1; state_n = s_0; end
                 else if (src_valid_i[1]) begin src_ready[1] = 1'b1; state_n = s_1; end
+                else state_n = s_1; 
                 end
         s_2:    begin
                 $display("STATE: 2");
@@ -110,6 +112,7 @@ module DMAC_ARBITER
                 else if (src_valid_i[0]) begin src_ready[0] = 1'b1; state_n = s_0; end
                 else if (src_valid_i[1]) begin src_ready[1] = 1'b1; state_n = s_1; end
                 else if (src_valid_i[2]) begin src_ready[2] = 1'b1; state_n = s_2; end
+                else state_n = s_2;
                 end
         s_3:    begin
                 $display("STATE: 3");
@@ -124,15 +127,13 @@ module DMAC_ARBITER
                 else if (src_valid_i[1]) begin src_ready[1] = 1'b1; state_n = s_1; end
                 else if (src_valid_i[2]) begin src_ready[2] = 1'b1; state_n = s_2; end
                 else if (src_valid_i[3]) begin src_ready[3] = 1'b1; state_n = s_3; end
+                else state_n = s_3;
                 end
         endcase
     end
 
     assign  dst_data_o                = dst_data;
     assign  dst_valid_o               = dst_valid;
-    assign  src_ready_o[0]               = src_ready[0];
-    assign  src_ready_o[1]               = src_ready[1];
-    assign  src_ready_o[2]               = src_ready[2];
-    assign  src_ready_o[3]               = src_ready[3];
+    assign  src_ready_o               = src_ready;
 
 endmodule
