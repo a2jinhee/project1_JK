@@ -72,9 +72,14 @@ module DMAC_ARBITER
                 $display("src_valid_i[1]: %d", src_valid_i[1]);
                 $display("src_valid_i[2]: %d", src_valid_i[2]);
                 $display("src_valid_i[3]: %d", src_valid_i[3]);
+                $display("src_ready[0]: %d", src_ready[0]);
+                $display("src_ready[1]: %d", src_ready[1]);
+                $display("src_ready[2]: %d", src_ready[2]);
+                $display("src_ready[3]: %d", src_ready[3]);
+                
                 dst_valid = 1'b1;
                 dst_data_n = src_data_i[0];
-                
+
                 if      (src_valid_i[1]) begin src_ready[1] = 1'b1; state_n = s_1; end
                 else if (src_valid_i[2]) begin src_ready[2] = 1'b1; state_n = s_2; end
                 else if (src_valid_i[3]) begin src_ready[3] = 1'b1; state_n = s_3; end
