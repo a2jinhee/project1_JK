@@ -69,6 +69,7 @@ module DMAC_ARBITER
         
         case (state)
         s_0:     begin
+                $display("STATE: 0");
                 $display("dst_ready_i: %d", dst_ready_i);
                 $display("src_valid_i: %d%d%d%d", src_valid_i[0], src_valid_i[1], src_valid_i[2], src_valid_i[3]);
                 $display("src_ready: %d%d%d%d", src_ready[0], src_ready[1], src_ready[2], src_ready[3]);
@@ -83,6 +84,7 @@ module DMAC_ARBITER
                 else if (src_valid_i[0]) begin src_ready[0] = 1'b1; state_n = s_0; end
                 end
         s_1:    begin
+                $display("STATE: 1");
                 if (src_ready[1] && dst_ready_i) begin
                     dst_valid_n = 1'b1;
                     dst_data_n = src_data_i[1];
@@ -93,6 +95,7 @@ module DMAC_ARBITER
                 else if (src_valid_i[1]) begin src_ready[1] = 1'b1; state_n = s_1; end
                 end
         s_2:    begin
+                $display("STATE: 2");
                 if (src_ready[2] && dst_ready_i) begin
                     dst_valid_n = 1'b1;
                     dst_data_n = src_data_i[2];
@@ -103,6 +106,7 @@ module DMAC_ARBITER
                 else if (src_valid_i[2]) begin src_ready[2] = 1'b1; state_n = s_2; end
                 end
         s_3:    begin
+                $display("STATE: 3");
                 if (src_ready[3] && dst_ready_i) begin
                     dst_valid_n = 1'b1;
                     dst_data_n = src_data_i[3];
