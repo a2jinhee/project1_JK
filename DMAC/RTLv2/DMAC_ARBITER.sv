@@ -58,6 +58,3 @@ module DMAC_ARBITER
     end
 
 endmodule
-
-
-endmodule
