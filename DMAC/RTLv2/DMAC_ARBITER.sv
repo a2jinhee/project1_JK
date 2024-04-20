@@ -41,11 +41,11 @@ module DMAC_ARBITER
 
     always @* begin
         // Check if any source is ready and select the current master
-        src_ready_o[current_master] = src_valid_i[current_master] & !dst_valid_o;
+        src_ready_o[current_master] = src_valid_i[current_master];
         // Assign data from the selected master to the destination
         if (src_ready_o[current_master] && dst_ready_i) begin
             dst_data_o <= src_data_i[current_master];
-            dst_valid_o <= 1;
+            dst_valid_o <= src_valid_i[current_master];
         end
     end
 
