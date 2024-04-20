@@ -23,39 +23,26 @@ module DMAC_ARBITER
 );
 
     // // TODO: implement your arbiter here
-    // reg [N_MASTER-1:0] current_master;
-    // reg [N_MASTER-1:0] next_master;
+    reg [N_MASTER-1:0] round_robin_counter = 0;
 
-    // always @(posedge clk or negedge rst_n) begin
-    //     if (!rst_n) begin
-    //         current_master <= 0;
-    //         next_master <= 0;
-    //         dst_valid_o <= 0;
-    //     end else begin
-    //         // Increment the counter to select the next master
-    //         if (dst_ready_i) begin
-    //             next_master <= (current_master == N_MASTER - 1) ? 0 : current_master + 1;
-    //         end
-    //     end
-    // end
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            round_robin_counter <= 0;
+            dst_valid_o <= 0;
+        end else begin
+            if (dst_ready_i && dst_valid_o) begin
+                dst_valid_o <= 0;
+                round_robin_counter <= (round_robin_counter == N_MASTER - 1) ? 0 : round_robin_counter + 1;
+            end else begin
+                dst_valid_o <= src_valid_i[round_robin_counter];
+            end
+        end
+    end
 
-    // always @* begin
-    //     // Check if any source is ready and select the current master
-    //     src_ready_o[current_master] = src_valid_i[current_master]
-    //     // Assign data from the selected master to the destination
-    //     if (src_ready_o[current_master] && dst_ready_i) begin
-    //         dst_data_o <= src_data_i[current_master];
-    //         dst_valid_o <= 1;
-    //     end
-    // end
+    assign src_ready_o = (dst_valid_o && !dst_ready_i) ? 1'b0 : src_valid_i;
 
-    // always @(posedge clk) begin
-    //     if (!rst_n) begin
-    //         current_master <= 0;
-    //     end else if (dst_ready_i) begin
-    //         current_master <= next_master;
-    //     end
-    // end
-
+    always @* begin
+        dst_data_o = src_data_i[round_robin_counter];
+    end
 
 endmodule
