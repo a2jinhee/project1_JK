@@ -31,48 +31,53 @@ module DMAC_ARBITER
     // dst_valid_o : valid signal for selected slave  = if 1, slave has data to receive
     // dst_data_o : data signal for slave = (id, data, strb, last)
 
-    // Priority encoder to determine the highest priority requesting master
-    // Round-robin arbiter logic
-    reg [N_MASTER-1:0] next_master;
-    reg [N_MASTER-1:0] current_master;
+    // Arbiter shoots src_ready_o=1 in a round robin way
+    // if src_valid_i=1 when arbiter shoots src_ready_o=1 to corresponding slave, arbiter selects the slave
+    
+    // if dst_ready_i=1, arbiter shoots dst_valid_o=1 to the selected slave
+    // get data from the selected slave and send it to the dst_data_o
 
+    reg [N_MASTER-1:0] round_robin_counter;
+
+    // Round-robin logic
     always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-        next_master <= 'b0;
-        current_master <= 'b0;
+        if (~rst_n) begin
+            round_robin_counter <= 0;
+            src_ready_o <= {N_MASTER{1'b0}}; // Initialize all src_ready_o signals to 0
         end else begin
-        // Find the next valid master in a round-robin fashion
-        next_master = next_master + 1'b1;
-        while (~src_valid_i[next_master] && next_master != current_master) begin
-            next_master = next_master + 1'b1;
-            if (next_master == 3) begin
-            next_master = 0;
+            if (dst_ready_i && dst_valid_o) begin
+                // If the destination is ready and data was consumed, move to the next round
+                round_robin_counter <= (round_robin_counter + 1) % N_MASTER;
             end
         end
-        
-        // Update current master only if a valid master is found
-        if (src_valid_i[next_master]) begin
-            current_master <= next_master;
-        end
+    end
+
+    // Assign src_ready_o in a round-robin manner
+    always @* begin
+        for (integer i = 0; i < N_MASTER; i = i + 1) begin
+            if (i == round_robin_counter && src_valid_i[i]) begin
+                src_ready_o[i] = 1'b1;
+            end else begin
+                src_ready_o[i] = 1'b0;
+            end
         end
     end
 
-    // Grant access to the current master
+    // When destination is ready, grant access to selected slave
     always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-        src_ready_o <= 'b0;
+        if (~rst_n) begin
+            dst_valid_o <= 1'b0;
         end else begin
-        src_ready_o <= src_valid_i & {N_MASTER{current_master}};  // One-hot encoded ready signal
+            if (dst_ready_i && src_ready_o[round_robin_counter]) begin
+                dst_valid_o <= 1'b1;
+            end
         end
     end
 
-    // Assign data from the current master to the output
+    // Data transfer logic
     always @(posedge clk) begin
-        if (dst_ready_i) begin
-        dst_valid_o <= src_valid_i[current_master];
-        dst_data_o <= src_data_i[current_master];
-        end else begin
-        dst_valid_o <= 1'b0;
+        if (dst_ready_i && src_ready_o[round_robin_counter] && dst_valid_o) begin
+            dst_data_o <= src_data_i[round_robin_counter];
         end
     end
 
