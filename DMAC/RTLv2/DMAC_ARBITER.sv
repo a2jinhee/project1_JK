@@ -22,36 +22,24 @@ module DMAC_ARBITER
     output  reg     [DATA_SIZE-1:0] dst_data_o
 );
 
-always @* begin
-    // Find the next valid master
-    integer i;
-    for (i = 0; i < N_MASTER; i = i + 1) begin
-        if (src_valid_i[next_master]) begin
-            // Next master is valid, grant access to it
-            src_ready_o[next_master] = 1;
-            break;
-        end else begin
-            // Move to the next master
-            next_master = (next_master == N_MASTER - 1) ? 0 : next_master + 1;
+    // TODO: implement ROUND ROBIN arbiter here
+    // Internal signals
+    reg [N_MASTER-1:0] selected_master;
+    
+    // Round-robin logic
+    always @(posedge clk or negedge rst_n) begin
+        if (~rst_n) begin
+            selected_master <= 0; // Reset to master 0
+            dst_valid_o <= 0;     // Reset valid output
+        end
+        else if (dst_ready_i) begin
+            // Round-robin selection
+            selected_master <= (selected_master == N_MASTER-1) ? 0 : selected_master + 1;
+            dst_valid_o <= src_valid_i[selected_master];
+            src_ready_o[selected_master] <= dst_valid_o;
+            dst_data_o <= src_data_i[selected_master];
         end
     end
 
-    // Reset src_ready_o for all masters except the current one
-    for (i = 0; i < N_MASTER; i = i + 1) begin
-        if (i != current_master) begin
-            src_ready_o[i] = 0;
-        end
-    end
-
-    // Check if any master is ready to send data
-    if (src_ready_o[current_master]) begin
-        // Transfer data to destination
-        dst_data_o = src_data_i[current_master];
-        dst_valid_o = 1;
-    end else begin
-        // No master is ready, keep destination invalid
-        dst_valid_o = 0;
-    end
-end
 
 endmodule
