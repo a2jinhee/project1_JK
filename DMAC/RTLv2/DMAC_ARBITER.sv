@@ -58,38 +58,38 @@ module DMAC_ARBITER
     always @ (*) begin
         case (present_state)
         s_0:     begin
-                if      begin (src_valid_i[1]) src_ready_o[1] = 1'b1; next_state = s_1; end
-                else if begin (src_valid_i[2]) src_ready_o[2] = 1'b1; next_state = s_2; end
-                else if begin (src_valid_i[3]) src_ready_o[3] = 1'b1; next_state = s_3; end
-                else if begin (src_valid_i[0]) src_ready_o[0] = 1'b1; next_state = s_0; end
+                if      (src_valid_i[1]) begin src_ready_o[1] = 1'b1; next_state = s_1; end
+                else if (src_valid_i[2]) begin src_ready_o[2] = 1'b1; next_state = s_2; end
+                else if (src_valid_i[3]) begin src_ready_o[3] = 1'b1; next_state = s_3; end
+                else if (src_valid_i[0]) begin src_ready_o[0] = 1'b1; next_state = s_0; end
                 else             next_state = s_ideal;
                 end
         s_1:    begin
-                if      begin (src_valid_i[2]) src_ready_o[2] = 1'b1; next_state = s_2; end
-                else if begin (src_valid_i[3]) src_ready_o[3] = 1'b1; next_state = s_3; end
-                else if begin (src_valid_i[0]) src_ready_o[0] = 1'b1; next_state = s_0; end
-                else if begin (src_valid_i[1]) src_ready_o[1] = 1'b1; next_state = s_1; end
+                if      (src_valid_i[2]) begin src_ready_o[2] = 1'b1; next_state = s_2; end
+                else if (src_valid_i[3]) begin src_ready_o[3] = 1'b1; next_state = s_3; end
+                else if (src_valid_i[0]) begin src_ready_o[0] = 1'b1; next_state = s_0; end
+                else if (src_valid_i[1]) begin src_ready_o[1] = 1'b1; next_state = s_1; end
                 else             next_state = s_ideal;
                 end
         s_2:    begin
-                if      begin (src_valid_i[3]) src_ready_o[3] = 1'b1; next_state = s_3; end
-                else if begin (src_valid_i[0]) src_ready_o[0] = 1'b1; next_state = s_0; end
-                else if begin (src_valid_i[1]) src_ready_o[1] = 1'b1; next_state = s_1; end
-                else if begin (src_valid_i[2]) src_ready_o[2] = 1'b1; next_state = s_2; end
+                if      (src_valid_i[3]) begin src_ready_o[3] = 1'b1; next_state = s_3; end
+                else if (src_valid_i[0]) begin src_ready_o[0] = 1'b1; next_state = s_0; end
+                else if (src_valid_i[1]) begin src_ready_o[1] = 1'b1; next_state = s_1; end
+                else if (src_valid_i[2]) begin src_ready_o[2] = 1'b1; next_state = s_2; end
                 else             next_state = s_ideal;
                 end
         s_3:    begin
-                if      begin (src_valid_i[0]) src_ready_o[0] = 1'b1; next_state = s_0; end
-                else if begin (src_valid_i[1]) src_ready_o[1] = 1'b1; next_state = s_1; end
-                else if begin (src_valid_i[2]) src_ready_o[2] = 1'b1; next_state = s_2; end
-                else if begin (src_valid_i[3]) src_ready_o[3] = 1'b1; next_state = s_3; end
+                if      (src_valid_i[0]) begin src_ready_o[0] = 1'b1; next_state = s_0; end
+                else if (src_valid_i[1]) begin src_ready_o[1] = 1'b1; next_state = s_1; end
+                else if (src_valid_i[2]) begin src_ready_o[2] = 1'b1; next_state = s_2; end
+                else if (src_valid_i[3]) begin src_ready_o[3] = 1'b1; next_state = s_3; end
                 else             next_state = s_ideal;
                 end
         default: begin
-                if      begin (src_valid_i[0]) src_ready_o[0] = 1'b1; next_state = s_0; end
-                else if begin (src_valid_i[1]) src_ready_o[1] = 1'b1; next_state = s_1; end
-                else if begin (src_valid_i[2]) src_ready_o[2] = 1'b1; next_state = s_2; end
-                else if begin (src_valid_i[3]) src_ready_o[3] = 1'b1; next_state = s_3; end
+                if      (src_valid_i[0]) begin src_ready_o[0] = 1'b1; next_state = s_0; end
+                else if (src_valid_i[1]) begin src_ready_o[1] = 1'b1; next_state = s_1; end
+                else if (src_valid_i[2]) begin src_ready_o[2] = 1'b1; next_state = s_2; end
+                else if (src_valid_i[3]) begin vsrc_ready_o[3] = 1'b1; next_state = s_3; end
                 else             next_state = s_ideal;
                 end
         endcase
