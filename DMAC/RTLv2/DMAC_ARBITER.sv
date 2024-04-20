@@ -37,49 +37,110 @@ module DMAC_ARBITER
     // if dst_ready_i=1, arbiter shoots dst_valid_o=1 to the selected slave
     // get data from the selected slave and send it to the dst_data_o
 
-    reg [N_MASTER-1:0] round_robin_counter;
+    // mnemonics for state values
+    reg [2:0] present_state;
+    reg [2:0] next_state;
 
-    // Round-robin logic
-    always @(posedge clk or negedge rst_n) begin
-        if (~rst_n) begin
-            round_robin_counter <= 0;
-            src_ready_o <= '{N_MASTER{1'b0}}; // Initialize all src_ready_o signals to 0
-        end else begin
-            if (dst_ready_i && dst_valid_o) begin
-                // If the destination is ready and data was consumed, move to the next round
-                round_robin_counter <= (round_robin_counter + 1) % N_MASTER;
+    parameter [2:0] s_ideal = 3'b000;
+    parameter [2:0] s_0 = 3'b001;
+    parameter [2:0] s_1 = 3'b010;
+    parameter [2:0] s_2 = 3'b011;
+    parameter [2:0] s_3 = 3'b100;
+
+    always @ (posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            present_state <= s_ideal;
+        end
+        else begin
+            present_state <= next_state;
+        end
+    end
+
+    always @ (*) begin
+        case (present_state)
+            s_ideal: begin
+                if      (src_valid_i[0]) src_ready_o[0] = 1'b1; next_state = s_0;
+                else if (src_valid_i[1]) src_ready_o[1] = 1'b1; next_state = s_1;
+                else if (src_valid_i[2]) src_ready_o[2] = 1'b1; next_state = s_2;
+                else if (src_valid_i[3]) src_ready_o[3] = 1'b1; next_state = s_3;
+                else             next_state = s_ideal;
             end
-        end
+        s_0:     begin
+                if      (src_valid_i[1]) src_ready_o[1] = 1'b1; next_state = s_1;
+                else if (src_valid_i[2]) src_ready_o[2] = 1'b1; next_state = s_2;
+                else if (src_valid_i[3]) src_ready_o[3] = 1'b1; next_state = s_3;
+                else if (src_valid_i[0]) src_ready_o[0] = 1'b1; next_state = s_0;
+                else             next_state = s_ideal;
+                end
+        s_1:     begin
+                if (src_ready[1] && dst_ready_i) begin
+                    dst_valid_o = 1'b1;
+                    dst_data_o = src_data_i[1];
+                end
+                if      (src_valid_i[2]) src_ready_o[2] = 1'b1; next_state = s_2;
+                else if (src_valid_i[3]) src_ready_o[3] = 1'b1; next_state = s_3;
+                else if (src_valid_i[0]) src_ready_o[0] = 1'b1; next_state = s_0;
+                else if (src_valid_i[1]) src_ready_o[1] = 1'b1; next_state = s_1;
+                else             next_state = s_ideal;
+                end
+        s_2:     begin
+                if (src_ready[2] && dst_ready_i) begin
+                    dst_valid_o = 1'b1;
+                    dst_data_o = src_data_i[2];
+                end
+                if      (src_valid_i[3]) src_ready_o[3] = 1'b1; next_state = s_3;
+                else if (src_valid_i[0]) src_ready_o[0] = 1'b1; next_state = s_0;
+                else if (src_valid_i[1]) src_ready_o[1] = 1'b1; next_state = s_1;
+                else if (src_valid_i[2]) src_ready_o[2] = 1'b1; next_state = s_2;
+                else             next_state = s_ideal;
+                end
+        s_3:     begin
+                if (src_ready[3] && dst_ready_i) begin
+                    dst_valid_o = 1'b1;
+                    dst_data_o = src_data_i[3];
+                end
+                if      (src_valid_i[0]) src_ready_o[0] = 1'b1; next_state = s_0;
+                else if (src_valid_i[1]) src_ready_o[1] = 1'b1; next_state = s_1;
+                else if (src_valid_i[2]) src_ready_o[2] = 1'b1; next_state = s_2;
+                else if (src_valid_i[3]) src_ready_o[3] = 1'b1; next_state = s_3;
+                else             next_state = s_ideal;
+                end
+        default: begin
+                if      (src_valid_i[0]) src_ready_o[0] = 1'b1; next_state = s_0;
+                else if (src_valid_i[1]) src_ready_o[1] = 1'b1; next_state = s_1;
+                else if (src_valid_i[2]) src_ready_o[2] = 1'b1; next_state = s_2;
+                else if (src_valid_i[3]) src_ready_o[3] = 1'b1; next_state = s_3;
+                else             next_state = s_ideal;
+                end
+        endcase
     end
 
-    // Assign src_ready_o in a round-robin manner
-    always @* begin
-        for (integer i = 0; i < N_MASTER; i = i + 1) begin
-            if (i == round_robin_counter && src_valid_i[i]) begin
-                src_ready_o[i] = 1'b1;
-            end else begin
-                src_ready_o[i] = 1'b0;
-            end
-        end
+    always @ (*) begin
+        case (present_state)
+            s_0: 
+                if (src_ready[0] && dst_ready_i) begin
+                    dst_valid_o = 1'b1;
+                    dst_data_o = src_data_i[0];
+                end
+            s_1:
+                if (src_ready[1] && dst_ready_i) begin
+                    dst_valid_o = 1'b1;
+                    dst_data_o = src_data_i[1];
+                end
+            s_2: 
+                if (src_ready[2] && dst_ready_i) begin
+                    dst_valid_o = 1'b1;
+                    dst_data_o = src_data_i[2];
+                end
+            s_3: 
+                if (src_ready[3] && dst_ready_i) begin
+                    dst_valid_o = 1'b1;
+                    dst_data_o = src_data_i[3];
+                end
+            default: 
+                dst_valid_o = 1'b0;
+                dst_data_o = 32'd0;
+        endcase
     end
-
-    // When destination is ready, grant access to selected slave
-    always @(posedge clk or negedge rst_n) begin
-        if (~rst_n) begin
-            dst_valid_o <= 1'b0;
-        end else begin
-            if (dst_ready_i && src_ready_o[round_robin_counter]) begin
-                dst_valid_o <= 1'b1;
-            end
-        end
-    end
-
-    // Data transfer logic
-    always @(posedge clk) begin
-        if (dst_ready_i && src_ready_o[round_robin_counter] && dst_valid_o) begin
-            dst_data_o <= src_data_i[round_robin_counter];
-        end
-    end
-
 
 endmodule
