@@ -32,60 +32,49 @@ module DMAC_ARBITER
     // dst_data_o : data signal for slave = (id, data, strb, last)
 
     // Priority encoder to determine the highest priority requesting master
-    wire                   [N_MASTER-1:0] grant;
-    priority_encoder #( .N (N_MASTER) ) priority_encoder_inst (
-        .clk(clk),
-        .rst_n(rst_n),
-        .i_vec(src_valid_i),
-        .o_vec(grant)
-    );
+    // Round-robin arbiter logic
+    reg [N_MASTER-1:0] next_master;
+    reg [N_MASTER-1:0] current_master;
 
-    // Round robin counter to handle priority ties
-    reg                     [N_MASTER-1:0] round_robin_counter;
-    always @(posedge clk, negedge rst_n) begin
+    always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-        round_robin_counter <= 0;
-        end else if (dst_ready_i) begin
-        // Increment counter only when data is transferred
-        round_robin_counter <= round_robin_counter + 1'b1;
-        end
-    end
-
-    // Combine grant with round robin counter for final arbiter output
-    wire                   [N_MASTER-1:0] final_grant;
-    generate
-        for (genvar i = 0; i < N_MASTER; i = i + 1) begin
-        assign final_grant[i] = grant[i] | (round_robin_counter == i);
-        end
-    endgenerate
-
-    // Assign outputs based on final grant
-    always @(posedge clk, negedge rst_n) begin
-        if (!rst_n) begin
-        src_ready_o <= 'b0;
-        dst_valid_o <= 1'b0;
-        dst_data_o <= 'b0;
+        next_master <= 'b0;
+        current_master <= 'b0;
         end else begin
-        src_ready_o <= final_grant;
-        dst_valid_o = final_grant & dst_ready_i;  // Only send data when both ready
-        dst_data_o = src_data_i[PriorityEncode(final_grant)];  // Select data based on granted master
-        end
-    end
-
-    // Helper function to get the index of the highest bit in the grant vector
-    function integer PriorityEncode;
-        input logic [N_MASTER-1:0] vec;
-        integer i;
-        begin
-        PriorityEncode = -1;
-        for (i = 0; i < N_MASTER; i = i + 1) begin
-            if (vec[i]) begin
-            PriorityEncode = i;
-            return;
+        // Find the next valid master in a round-robin fashion
+        next_master = next_master + 1'b1;
+        while (~src_valid_i[next_master] && next_master != current_master) begin
+            next_master = next_master + 1'b1;
+            if (next_master == N_MASTER'b0) begin
+            next_master = N_MASTER'b1;
             end
         end
+        
+        // Update current master only if a valid master is found
+        if (src_valid_i[next_master]) begin
+            current_master <= next_master;
         end
-    endfunction
+        end
+    end
+
+    // Grant access to the current master
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+        src_ready_o <= 'b0;
+        end else begin
+        src_ready_o <= src_valid_i & {N_MASTER{current_master}};  // One-hot encoded ready signal
+        end
+    end
+
+    // Assign data from the current master to the output
+    always @(posedge clk) begin
+        if (dst_ready_i) begin
+        dst_valid_o <= src_valid_i[current_master];
+        dst_data_o <= src_data_i[current_master];
+        end else begin
+        dst_valid_o <= 1'b0;
+        end
+    end
 
 
 endmodule
