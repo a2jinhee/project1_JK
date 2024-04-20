@@ -29,6 +29,7 @@ module DMAC_ARBITER
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
+            // Reset state
             chosen_src <= 0;
             chosen_data <= 0;
             chosen_valid <= 0;
@@ -38,18 +39,20 @@ module DMAC_ARBITER
             dst_valid_o <= 0;
             dst_data_o <= 0;
         end else begin
-            // Arbitration logic
-            chosen_src <= 'd0;
-            for (int i = 1; i < N_MASTER; i = i + 1) begin
-                if (src_valid_i[i] && !src_ready_o[i]) begin
-                    chosen_src <= i;
-                end
+            // Round-robin priority scheme
+            chosen_src <= chosen_src + 1;
+            if (chosen_src >= N_MASTER) begin
+                chosen_src <= 0; // Wrap around
             end
-            if (src_valid_i[chosen_src]) begin
+
+            // Check if the chosen source has valid data and is ready to transmit
+            if (src_valid_i[chosen_src] && !src_ready_o[chosen_src]) begin
                 chosen_data <= src_data_i[chosen_src];
                 chosen_valid <= 1;
                 src_ready_o[chosen_src] <= 1;
             end
+
+            // Check if destination is ready to receive data
             if (chosen_valid && dst_ready_i) begin
                 dst_valid_o <= 1;
                 dst_data_o <= chosen_data;
