@@ -68,7 +68,7 @@ module DMAC_ARBITER
         case (state)
         s_0:     begin
                 $display("dst_ready_i: %d", dst_ready_i);
-                $display("src_valid_i: %d", src_ready_i);
+                $display("src_valid_i: %d", src_valid_i);
                 if (src_ready[0] && dst_ready_i) begin
                     dst_valid = 1'b1;
                     dst_data_n = src_data_i[0];
