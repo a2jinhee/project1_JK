@@ -63,7 +63,7 @@ module DMAC_ARBITER
         state_n                 = state;
         dst_data_n              = dst_data;
         dst_valid               = 1'b0;
-        src_ready               = 4'b0000;
+        src_ready               = '{N_MASTER{1'b0}};
         
         case (state)
         s_0:     begin
