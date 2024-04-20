@@ -51,7 +51,7 @@ module DMAC_ARBITER
     // it's desirable to code registers in a simple way
     always_ff @(posedge clk)
         if (!rst_n) begin
-            state               <= S_0;
+            state               <= s_0;
             dst_data            <= 32'd0;
         end
         else begin
