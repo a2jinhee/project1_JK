@@ -54,18 +54,20 @@ module DMAC_ARBITER
             state               <= s_0;
             dst_data            <= 32'd0;
             dst_valid           <= 1'b0;
+            src_ready           <= '{N_MASTER{1'b0}};
         end
         else begin
             state               <= state_n;
             dst_data            <= dst_data_n;
             dst_valid           <= dst_valid_n;
+            src_ready           <= src_ready_n;
         end
 
     always_comb begin
         state_n                 = state;
         dst_data_n              = dst_data;
-        dst_valid_n             = 1'b0;
-        src_ready_n             = '{N_MASTER{1'b0}};
+        dst_valid_n             = dst_valid;
+        src_ready_n             = src_ready;
         
         case (state)
         s_0:     begin
