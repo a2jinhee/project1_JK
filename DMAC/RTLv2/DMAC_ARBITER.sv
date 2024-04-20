@@ -45,8 +45,8 @@ module DMAC_ARBITER
         next_master = next_master + 1'b1;
         while (~src_valid_i[next_master] && next_master != current_master) begin
             next_master = next_master + 1'b1;
-            if (next_master == N_MASTER'b0) begin
-            next_master = N_MASTER'b1;
+            if (next_master == 3) begin
+            next_master = 0;
             end
         end
         
