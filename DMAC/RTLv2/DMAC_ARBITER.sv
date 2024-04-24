@@ -74,13 +74,8 @@ module DMAC_ARBITER
         case (state)
         s_0:     begin
                 dst_data_o = src_data_i[0];
-                if (src_valid_i[0]) begin
-                    src_ready_o[0] = 1'b1;
-                    dst_valid_o = 1'b1;
-                end else begin
-                    src_ready_o[0] = 1'b0;
-                    dst_valid_o = 1'b0;  
-                end
+                dst_valid_o = src_valid_i[0] ? 1 : 0;
+				src_ready_o[0] = dst_ready_i ? 1 : 0;
 
                 if (!dst_valid_o) begin
                     if      (src_valid_i[1]) begin state_n = s_1; end
@@ -94,13 +89,8 @@ module DMAC_ARBITER
 
         s_1:    begin
                 dst_data_o = src_data_i[1];
-                if (src_valid_i[1]) begin
-                    src_ready_o[1] = 1'b1;
-                    dst_valid_o = 1'b1;
-                end else begin
-                    src_ready_o[1] = 1'b0;
-                    dst_valid_o = 1'b0;  
-                end
+                dst_valid_o = src_valid_i[1] ? 1 : 0;
+				src_ready_o[1] = dst_ready_i ? 1 : 0;
 
                 if (!dst_valid_o) begin
                     if      (src_valid_i[2]) begin state_n = s_2; end
@@ -114,13 +104,8 @@ module DMAC_ARBITER
 
         s_2:    begin
                 dst_data_o = src_data_i[2];
-                if (src_valid_i[2]) begin
-                    src_ready_o[2] = 1'b1;
-                    dst_valid_o = 1'b1;
-                end else begin
-                    src_ready_o[2] = 1'b0;
-                    dst_valid_o = 1'b0;  
-                end
+                dst_valid_o = src_valid_i[2] ? 1 : 0;
+				src_ready_o[2] = dst_ready_i ? 1 : 0;
 
                 if (!dst_valid_o) begin
                     if      (src_valid_i[3]) begin state_n = s_3; end
@@ -134,13 +119,8 @@ module DMAC_ARBITER
 
         s_3:    begin
                 dst_data_o = src_data_i[3];
-                if (src_valid_i[3]) begin
-                    src_ready_o[3] = 1'b1;
-                    dst_valid_o = 1'b1;  
-                end else begin
-                    src_ready_o[3] = 1'b0;
-                    dst_valid_o = 1'b0;  
-                end
+                dst_valid_o = src_valid_i[3] ? 1 : 0;
+				src_ready_o[3] = dst_ready_i ? 1 : 0;
 
                 if (!dst_valid_o) begin
                     if      (src_valid_i[0]) begin state_n = s_0; end
