@@ -44,37 +44,39 @@ module DMAC_ARBITER
                                 s_3  = 2'd3;
 
     reg     [1:0]               state,          state_n;
-    reg     [31:0]              dst_data,       dst_data_n;
-    reg                         dst_valid,      dst_valid_n;
-    reg                         src_ready[N_MASTER], src_ready_n[N_MASTER];
+    // reg     [31:0]              dst_data,       dst_data_n;
+    // reg                         dst_valid,      dst_valid_n;
+    // reg                         src_ready[N_MASTER], src_ready_n[N_MASTER];
 
     // it's desirable to code registers in a simple way
     always_ff @(posedge clk)
         if (!rst_n) begin
             state               <= s_0;
-            dst_data            <= 32'd0;
-            dst_valid           <= 1'b0;
-            src_ready           <= '{N_MASTER{1'b0}};
+            // dst_data            <= 32'd0;
+            // dst_valid           <= 1'b0;
+            // src_ready           <= '{N_MASTER{1'b0}};
         end
         else begin
             state               <= state_n;
-            dst_data            <= dst_data_n;
-            dst_valid           <= dst_valid_n;
-            src_ready           <= src_ready_n;
+            // dst_data            <= dst_data_n;
+            // dst_valid           <= dst_valid_n;
+            // src_ready           <= src_ready_n;
         end
 
     always_comb begin
         state_n                 = state;
-        dst_data_n              = dst_data;
-        dst_valid_n             = dst_valid;
-        src_ready_n             = src_ready;
+        // dst_data_n              = dst_data;
+        // dst_valid_n             = dst_valid;
+        // src_ready_n             = src_ready;
+        dst_valid_o             = 0; 
+        src_ready_o             = '{N_MASTER{1'b0}};
         
         case (state)
         s_0:     begin
                 if (src_valid_i[0]) begin
-                    src_ready_n[0] = 1'b1;
-                    dst_valid_n = 1'b1;
-                    dst_data_n = src_data_i[0];
+                    src_ready_o[0] = 1'b1;
+                    dst_valid_o = 1'b1;
+                    dst_data_o = src_data_i[0];
                 end
 
                 if (!dst_valid_o) begin
@@ -89,9 +91,9 @@ module DMAC_ARBITER
 
         s_1:    begin
                 if (src_valid_i[1]) begin
-                    src_ready_n[1] = 1'b1;
-                    dst_valid_n = 1'b1;
-                    dst_data_n = src_data_i[1];
+                    src_ready_o[1] = 1'b1;
+                    dst_valid_o = 1'b1;
+                    dst_data_o = src_data_i[1];
                 end
                 if (!dst_valid_o) begin
                     if      (src_valid_i[2]) begin state_n = s_2; end
@@ -105,9 +107,9 @@ module DMAC_ARBITER
 
         s_2:    begin
                 if (src_valid_i[2]) begin
-                    src_ready_n[2] = 1'b1;
-                    dst_valid_n = 1'b1;
-                    dst_data_n = src_data_i[2];
+                    src_ready_o[2] = 1'b1;
+                    dst_valid_o = 1'b1;
+                    dst_data_o = src_data_i[2];
                 end
 
                 if (!dst_valid_o) begin
@@ -122,9 +124,9 @@ module DMAC_ARBITER
 
         s_3:    begin
                 if (src_valid_i[3]) begin
-                    src_ready_n[3] = 1'b1;
-                    dst_valid_n = 1'b1;
-                    dst_data_n = src_data_i[3];
+                    src_ready_o[3] = 1'b1;
+                    dst_valid_o = 1'b1;
+                    dst_data_o = src_data_i[3];
                 end
 
                 if (!dst_valid_o) begin
@@ -138,8 +140,8 @@ module DMAC_ARBITER
         endcase
     end
 
-    assign  dst_data_o                = dst_data;
-    assign  dst_valid_o               = dst_valid;
-    assign  src_ready_o               = src_ready;
+    // assign  dst_data_o                = dst_data;
+    // assign  dst_valid_o               = dst_valid;
+    // assign  src_ready_o               = src_ready;
 
 endmodule
