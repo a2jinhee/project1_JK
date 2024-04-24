@@ -73,10 +73,10 @@ module DMAC_ARBITER
         
         case (state)
         s_0:     begin
+                dst_data_o = src_data_i[0];
                 if (src_valid_i[0]) begin
                     src_ready_o[0] = 1'b1;
                     dst_valid_o = 1'b1;
-                    dst_data_o = src_data_i[0];
                 end
 
                 if (!dst_valid_o) begin
@@ -90,10 +90,10 @@ module DMAC_ARBITER
 
 
         s_1:    begin
+                dst_data_o = src_data_i[1];
                 if (src_valid_i[1]) begin
                     src_ready_o[1] = 1'b1;
                     dst_valid_o = 1'b1;
-                    dst_data_o = src_data_i[1];
                 end
                 if (!dst_valid_o) begin
                     if      (src_valid_i[2]) begin state_n = s_2; end
@@ -106,10 +106,10 @@ module DMAC_ARBITER
 
 
         s_2:    begin
+                dst_data_o = src_data_i[2];
                 if (src_valid_i[2]) begin
                     src_ready_o[2] = 1'b1;
                     dst_valid_o = 1'b1;
-                    dst_data_o = src_data_i[2];
                 end
 
                 if (!dst_valid_o) begin
@@ -123,10 +123,10 @@ module DMAC_ARBITER
 
 
         s_3:    begin
+                dst_data_o = src_data_i[3];
                 if (src_valid_i[3]) begin
                     src_ready_o[3] = 1'b1;
-                    dst_valid_o = 1'b1;
-                    dst_data_o = src_data_i[3];
+                    dst_valid_o = 1'b1;  
                 end
 
                 if (!dst_valid_o) begin
