@@ -150,7 +150,7 @@ module DMAC_CFG
         end
         else if (psel_i & !penable_i & !pwrite_i) begin // in the setup cycle in the APB state diagram
             case (paddr_i)
-                'h0:   rdata            <= 32'h0001_2024;
+                'h0:   rdata            <= 32'h0201_2024;
                 'h100: rdata            <= ch0_src_addr;
                 'h104: rdata            <= ch0_dst_addr;
                 'h108: rdata            <= {16'd0, ch0_byte_len};
